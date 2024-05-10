@@ -8,46 +8,31 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
+struct SwiftUIView: View {
   @Environment(\.modelContext) private var modelContext
   @Query private var items: [Item]
 
   var body: some View {
     NavigationStack {
-      VStack{
-        //MARK: -List
-        List{
+      List {
+        ForEach(items) { item in
+          NavigationLink {
+            Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+          } label: {
+            Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+          }
         }
+        .onDelete(perform: deleteItems)
       }
-      //MARK: -Prop
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
           EditButton()
         }
-        ToolbarItem(placement: .bottomBar){
-          
-          Button(){
-
-          }label: {
-            //RECButtonView
-            ZStack{
-              Circle()
-                .stroke(Color(red:0.8, green:0.8, blue:0.8, opacity: 1),lineWidth: 4)
-                .frame(width: 60, height: 60)
-              Image(systemName: "circle.fill")
-                .resizable()
-                .frame(width: 50,height: 50)
-                .foregroundStyle(.red)
-            }
-          }
-          .padding(.bottom,60)
-        }
-
       }
-    }//:navi
-  }//:body
 
-  //MARK: -Other func
+    }
+  }
+
   private func addItem() {
     withAnimation {
       let newItem = Item(timestamp: Date())
@@ -68,3 +53,4 @@ struct ContentView: View {
   ContentView()
     .modelContainer(for: Item.self, inMemory: true)
 }
+

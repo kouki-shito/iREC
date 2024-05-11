@@ -20,6 +20,7 @@ struct ContentView: View {
   @State private var searchText = ""
   @State private var titleText : String = ""
   @State private var navigationPath : [SamplePath] = []
+  @State private var isAnimating : Bool = false
 
   var body: some View {
     NavigationStack(path: $navigationPath) {
@@ -96,7 +97,7 @@ struct ContentView: View {
       .navigationDestination(for: SamplePath.self){ value in
         switch value{
         case .REC:
-          RecView(isREC: $isREC)
+          RecView(isREC: $isREC,isAnimating:$isAnimating)
         case .Edit:
           EditView()
         case .Settings:

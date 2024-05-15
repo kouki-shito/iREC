@@ -9,30 +9,38 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-  
+
   enum SamplePath {
     case REC, Edit, Settings
   }
 
   @Environment(\.modelContext) private var modelContext
+
   @Query private var items: [Item]
-  @State private var isREC : Bool = false
   @State private var searchText = ""
   @State private var titleText : String = ""
   @State private var navigationPath : [SamplePath] = []
   @State private var isAnimating : Bool = false
 
+  @State var REC : Bool = false
+  @State var audios : [URL] = []
+
   var body: some View {
     NavigationStack(path: $navigationPath) {
+
       ZStack {
         Color.base
           .ignoresSafeArea()
+
         VStack{
           //MARK: -List
-          List{
-            Section{
+          List(){
+
+            ForEach(self.audios,id: \.self) { i in
+
               VStack{
-                Text("KingGnu")
+
+                Text(i.relativeString)
                   .fontWeight(.bold)
                   .font(.title2)
                   .frame(maxWidth: .infinity,alignment: .leading)
@@ -41,36 +49,50 @@ struct ContentView: View {
                   .frame(maxWidth: .infinity,alignment: .leading)
                   .font(.headline)
                   .opacity(0.7)
+
                 HStack{
                   //tag
                 }
+
               }
+              .foregroundStyle(.white)
+              .listRowBackground(Color.subAcc)
             }
-            .foregroundStyle(.white)
-            .listRowBackground(Color.subAcc)
+            .onDelete(perform: { indexSet in
+              deleteFiles(offsets: indexSet)
+            })
           }
+
           .searchable(text: $searchText)
           .scrollContentBackground(.hidden)
+
           Spacer()
+
           //MARK: -RECButton
           HStack {
+
             Button(){
-              isREC.toggle()
+
               navigationPath.append(.REC)
+
             }label: {
               //RECButtonView
               ZStack{
+
                 Circle()
                   .stroke(Color(red:0.8, green:0.8, blue:0.8, opacity: 1),lineWidth: 4)
                   .frame(width: 60, height: 60)
-                Image(systemName: isREC == false ? "circle.fill" : "stop.fill")
+
+                Image(systemName: "circle.fill")
                   .resizable()
-                  .frame(width: isREC == false ? 50:30,height: isREC == false ? 50:30)
+                  .frame(width: 50,height: 50)
                   .foregroundStyle(.red)
               }
               .padding(.bottom,30)
             }
+
           }
+
         }
         //MARK: -Prop
         .toolbar {
@@ -96,15 +118,22 @@ struct ContentView: View {
       }
       .navigationDestination(for: SamplePath.self){ value in
         switch value{
+
         case .REC:
-          RecView(isREC: $isREC,isAnimating:$isAnimating)
+          RecView(audios: $audios, REC: $REC, isAnimating:$isAnimating)
         case .Edit:
           EditView()
         case .Settings:
           SettingsView()
+
         }
       }
+      .onAppear(){
+        getAudios()
+        print(audios)
+      }
     }//:navi
+
   }//:body
 
   //MARK: -Other func
@@ -122,6 +151,48 @@ struct ContentView: View {
       }
     }
   }
+
+  private func getAudios(){
+
+    do{
+
+      let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+
+      //fetch all Data ...
+
+      let result = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .producesRelativePathURLs)
+
+      self.audios.removeAll()
+
+      for i in result{
+
+        self.audios.append(i)
+
+      }
+
+    }
+    catch{
+
+      print(error.localizedDescription)
+
+    }
+
+  }//:func
+
+  private func deleteFiles(offsets: IndexSet){
+    
+    for index in offsets{
+      do{
+        try FileManager.default.removeItem(at: audios[index])
+        self.audios.remove(atOffsets: offsets)
+      }
+      catch{
+        print(error.localizedDescription)
+      }
+    }
+
+  }
+
 }
 
 #Preview {

@@ -7,6 +7,8 @@
 
 import SwiftUI
 import SwiftData
+import Foundation
+import AVKit
 
 struct ContentView: View {
 
@@ -14,6 +16,12 @@ struct ContentView: View {
     case REC, Edit, Settings
   }
 
+  struct Audios{
+
+    var path:URL
+    var createDate:Date
+
+  }
   @Environment(\.modelContext) private var modelContext
 
   @Query private var items: [Item]
@@ -21,9 +29,17 @@ struct ContentView: View {
   @State private var titleText : String = ""
   @State private var navigationPath : [SamplePath] = []
   @State private var isAnimating : Bool = false
-
+  @State private var play : Bool = false
+  @State private var isPlayView : Bool = false
   @State var REC : Bool = false
+  @State private var SortArray : [Audios] = []
   @State var audios : [URL] = []
+
+  @State private var player : AVAudioPlayer!
+  @State private var session : AVAudioSession!
+  @State private var totalTime : TimeInterval = 0.0
+  @State private var currentTime : TimeInterval = 0.0
+  @State private var playingName : String = ""
 
   var body: some View {
     NavigationStack(path: $navigationPath) {
@@ -39,21 +55,25 @@ struct ContentView: View {
             ForEach(self.audios,id: \.self) { i in
 
               VStack{
-
+                let CreateDate = getCreationDateStr(url: i)
                 Text(i.relativeString)
                   .fontWeight(.bold)
                   .font(.title2)
                   .frame(maxWidth: .infinity,alignment: .leading)
 
-                Text("2024/5/11")
+                Text(CreateDate)
                   .frame(maxWidth: .infinity,alignment: .leading)
                   .font(.headline)
                   .opacity(0.7)
-
+                
                 HStack{
                   //tag
                 }
-
+              }
+              .contentShape(Rectangle())
+              .onTapGesture {
+                setupPlayerAudio(url: i)
+                playAudio()
               }
               .foregroundStyle(.white)
               .listRowBackground(Color.subAcc)
@@ -68,27 +88,50 @@ struct ContentView: View {
 
           Spacer()
 
-          //MARK: -RECButton
-          HStack {
+          //MARK: -player
 
-            Button(){
+          if isPlayView{
+            ZStack {
+              Rectangle()
+                .foregroundStyle(.sub).opacity(0.4)
+                .blur(radius: 1)
+                .frame(height: 80)
+              HStack{
 
-              navigationPath.append(.REC)
-
-            }label: {
-              //RECButtonView
-              ZStack{
-
-                Circle()
-                  .stroke(Color(red:0.8, green:0.8, blue:0.8, opacity: 1),lineWidth: 4)
-                  .frame(width: 60, height: 60)
-
-                Image(systemName: "circle.fill")
+                Image(systemName: "mic.fill")
                   .resizable()
-                  .frame(width: 50,height: 50)
-                  .foregroundStyle(.red)
+                  .scaledToFit()
+                  .foregroundStyle(.white)
+                  .frame(maxWidth:40,maxHeight: 30)
+                  .padding(.leading)
+
+                Text(playingName)
+                  .font(.title2)
+                  .fontWeight(.semibold)
+                  .foregroundStyle(.white)
+                  .frame(maxWidth: .infinity,alignment: .leading)
+                  .padding(.leading)
+
+                Button(){
+                  if play{
+                    stopAudio()
+                  }else{
+                    playAudio()
+                  }
+
+                }label: {
+
+                  Image(systemName: play ? "pause.fill":"play.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.white)
+                    .frame(width: 25,height: 25,alignment: .trailing)
+                    .padding(.trailing,20)
+
+                }
+
               }
-              .padding(.bottom,30)
+              .frame(maxWidth:.infinity,maxHeight: 80)
             }
 
           }
@@ -114,7 +157,39 @@ struct ContentView: View {
                 .padding(.bottom,10)
             }
           }
+          ToolbarItem(placement: .bottomBar){
+
+            HStack {
+
+              Button(){
+
+                navigationPath.append(.REC)
+
+              }label: {
+                //RECButtonView
+                ZStack{
+
+                  Circle()
+                    .stroke(Color(red:0.8, green:0.8, blue:0.8, opacity: 1),lineWidth: 4)
+                    .frame(width: 60, height: 60)
+
+                  Image(systemName: "circle.fill")
+                    .resizable()
+                    .frame(width: 50,height: 50)
+                    .foregroundStyle(.red)
+                }
+                .padding(.bottom,30)
+              }
+
+            }
+
+          }
+
         }
+        .toolbarBackground(.visible, for: .bottomBar)
+        .toolbarBackground(.base,for: .bottomBar)
+
+
       }
       .navigationDestination(for: SamplePath.self){ value in
         switch value{
@@ -127,11 +202,13 @@ struct ContentView: View {
           SettingsView()
 
         }
+
       }
       .onAppear(){
         getAudios()
-        print(audios)
+        //print(audios)
       }
+
     }//:navi
 
   }//:body
@@ -163,11 +240,18 @@ struct ContentView: View {
       let result = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .producesRelativePathURLs)
 
       self.audios.removeAll()
+      self.SortArray.removeAll()
 
       for i in result{
 
-        self.audios.append(i)
-
+        let attribute = try FileManager.default.attributesOfItem(atPath: i.path)
+        let creationDate = attribute[.creationDate] as? Date
+        let st = Audios(path: i, createDate: creationDate!)
+        self.SortArray.append(st)
+        self.SortArray.sort(by: {$0.createDate>$1.createDate})
+      }
+      for i in SortArray{
+        self.audios.append(i.path)
       }
 
     }
@@ -192,6 +276,56 @@ struct ContentView: View {
     }
 
   }
+
+  private func getCreationDateStr(url:URL) -> String {
+
+      let attribute = try? FileManager.default.attributesOfItem(atPath: url.path)
+      let creationDate = attribute?[.creationDate] as? Date
+      let DateStr = creationDate?.formatted(date: .numeric, time: .shortened) ?? "Error"
+      return DateStr
+  }
+
+  private func setupPlayerAudio(url : URL){
+    do{
+      player = try AVAudioPlayer(contentsOf: url)
+      player?.prepareToPlay()
+      playingName = url.relativePath
+      totalTime = player?.duration ?? 0.0
+    }
+    catch{
+      print(error.localizedDescription)
+    }
+  }
+
+  private func playAudio(){
+    if !isPlayView{
+      isPlayView = true
+    }
+    play = true
+    player?.play()
+  }
+
+  private func stopAudio(){
+    player?.pause()
+    play = false
+  }
+
+  private func updateProgress(){
+    guard let player = player else{return}
+    currentTime = player.currentTime
+  }
+
+  private func seekAudio(to time: TimeInterval){
+    player?.currentTime = time
+  }
+
+  private func timeString(time: TimeInterval) -> String{
+    let minute = Int(time) / 60
+    let seconds = Int(time) % 60
+    return String(format: "%02d:%02d", minute,seconds)
+
+  }
+
 
 }
 

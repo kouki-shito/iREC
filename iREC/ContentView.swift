@@ -29,17 +29,13 @@ struct ContentView: View {
   @State private var titleText : String = ""
   @State private var navigationPath : [SamplePath] = []
   @State private var isAnimating : Bool = false
-  @State private var play : Bool = false
-  @State private var isPlayView : Bool = false
+
   @State var REC : Bool = false
   @State private var SortArray : [Audios] = []
   @State var audios : [URL] = []
 
-  @State private var player : AVAudioPlayer!
-  @State private var session : AVAudioSession!
-  @State private var totalTime : TimeInterval = 0.0
-  @State private var currentTime : TimeInterval = 0.0
-  @State private var playingName : String = ""
+  @ObservedObject var audioPlay : AudioPlay = AudioPlay()
+
 
   var body: some View {
     NavigationStack(path: $navigationPath) {
@@ -65,15 +61,15 @@ struct ContentView: View {
                   .frame(maxWidth: .infinity,alignment: .leading)
                   .font(.headline)
                   .opacity(0.7)
-                
+
                 HStack{
                   //tag
                 }
               }
               .contentShape(Rectangle())
               .onTapGesture {
-                setupPlayerAudio(url: i)
-                playAudio()
+                audioPlay.setupPlayerAudio(url: i)
+                audioPlay.playAudio()
               }
               .foregroundStyle(.white)
               .listRowBackground(Color.subAcc)
@@ -90,12 +86,19 @@ struct ContentView: View {
 
           //MARK: -player
 
-          if isPlayView{
+          if audioPlay.isPlayView{
             ZStack {
-              Rectangle()
-                .foregroundStyle(.sub).opacity(0.4)
-                .blur(radius: 1)
-                .frame(height: 80)
+
+              VStack(spacing:0) {
+
+                ProgressView(value: audioPlay.currentTime,total: audioPlay.totalTime)
+
+                Rectangle()
+                  .foregroundStyle(.sub).opacity(0.4)
+                  .blur(radius: 1)
+                  .frame(height: 80)
+
+              }
               HStack{
 
                 Image(systemName: "mic.fill")
@@ -105,7 +108,7 @@ struct ContentView: View {
                   .frame(maxWidth:40,maxHeight: 30)
                   .padding(.leading)
 
-                Text(playingName)
+                Text(audioPlay.playingName)
                   .font(.title2)
                   .fontWeight(.semibold)
                   .foregroundStyle(.white)
@@ -113,15 +116,15 @@ struct ContentView: View {
                   .padding(.leading)
 
                 Button(){
-                  if play{
-                    stopAudio()
+                  if audioPlay.play{
+                    audioPlay.stopAudio()
                   }else{
-                    playAudio()
+                    audioPlay.playAudio()
                   }
 
                 }label: {
 
-                  Image(systemName: play ? "pause.fill":"play.fill")
+                  Image(systemName: audioPlay.play ? "pause.fill":"play.fill")
                     .resizable()
                     .scaledToFit()
                     .foregroundStyle(.white)
@@ -132,6 +135,10 @@ struct ContentView: View {
 
               }
               .frame(maxWidth:.infinity,maxHeight: 80)
+
+            }
+            .onTapGesture {
+              print("Hello")
             }
 
           }
@@ -162,7 +169,7 @@ struct ContentView: View {
             HStack {
 
               Button(){
-
+                audioPlay.stopAudio()
                 navigationPath.append(.REC)
 
               }label: {
@@ -206,7 +213,9 @@ struct ContentView: View {
       }
       .onAppear(){
         getAudios()
-        //print(audios)
+      }
+      .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()){ _ in
+        audioPlay.updateProgress()
       }
 
     }//:navi
@@ -264,7 +273,7 @@ struct ContentView: View {
   }//:func
 
   private func deleteFiles(offsets: IndexSet){
-    
+
     for index in offsets{
       do{
         try FileManager.default.removeItem(at: audios[index])
@@ -279,13 +288,29 @@ struct ContentView: View {
 
   private func getCreationDateStr(url:URL) -> String {
 
-      let attribute = try? FileManager.default.attributesOfItem(atPath: url.path)
-      let creationDate = attribute?[.creationDate] as? Date
-      let DateStr = creationDate?.formatted(date: .numeric, time: .shortened) ?? "Error"
-      return DateStr
+    let attribute = try? FileManager.default.attributesOfItem(atPath: url.path)
+    let creationDate = attribute?[.creationDate] as? Date
+    let DateStr = creationDate?.formatted(date: .numeric, time: .shortened) ?? "Error"
+    return DateStr
   }
 
-  private func setupPlayerAudio(url : URL){
+}
+
+class AudioPlay : NSObject,AVAudioPlayerDelegate,ObservableObject{
+
+  @Published var play : Bool = false
+  @Published var isPlayView : Bool = false
+  @Published var player : AVAudioPlayer!
+  @Published var session : AVAudioSession!
+  @Published var totalTime : TimeInterval = 0.0
+  @Published var currentTime : TimeInterval = 0.0
+  @Published var playingName : String = ""
+
+  override init() {
+    super.init()
+  }
+
+  func setupPlayerAudio(url : URL){
     do{
       player = try AVAudioPlayer(contentsOf: url)
       player?.prepareToPlay()
@@ -297,37 +322,41 @@ struct ContentView: View {
     }
   }
 
-  private func playAudio(){
+  func playAudio(){
     if !isPlayView{
       isPlayView = true
     }
     play = true
+    player?.delegate = self
     player?.play()
   }
 
-  private func stopAudio(){
+  func stopAudio(){
     player?.pause()
     play = false
   }
 
-  private func updateProgress(){
+  func updateProgress(){
     guard let player = player else{return}
     currentTime = player.currentTime
   }
 
-  private func seekAudio(to time: TimeInterval){
+  func seekAudio(to time: TimeInterval){
     player?.currentTime = time
   }
 
-  private func timeString(time: TimeInterval) -> String{
+  func timeString(time: TimeInterval) -> String{
     let minute = Int(time) / 60
     let seconds = Int(time) % 60
     return String(format: "%02d:%02d", minute,seconds)
 
   }
 
-
+  func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    stopAudio()
+  }
 }
+
 
 #Preview {
   ContentView()

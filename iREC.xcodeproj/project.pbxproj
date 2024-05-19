@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E0676732BF68C7F0058600B /* playSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0676722BF68C7F0058600B /* playSheetView.swift */; };
 		1E3F3AF72BEE6E580019DEE0 /* iRECApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3F3AF62BEE6E580019DEE0 /* iRECApp.swift */; };
 		1E3F3AF92BEE6E580019DEE0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3F3AF82BEE6E580019DEE0 /* ContentView.swift */; };
 		1E3F3AFB2BEE6E580019DEE0 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3F3AFA2BEE6E580019DEE0 /* Item.swift */; };
@@ -20,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		1E06766F2BF4CC3E0058600B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1E0676722BF68C7F0058600B /* playSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = playSheetView.swift; sourceTree = "<group>"; };
 		1E3F3AF32BEE6E580019DEE0 /* iREC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iREC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E3F3AF62BEE6E580019DEE0 /* iRECApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iRECApp.swift; sourceTree = "<group>"; };
 		1E3F3AF82BEE6E580019DEE0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -63,8 +65,9 @@
 			isa = PBXGroup;
 			children = (
 				1E06766F2BF4CC3E0058600B /* Info.plist */,
-				1E3F3AF82BEE6E580019DEE0 /* ContentView.swift */,
 				1E3F3AF62BEE6E580019DEE0 /* iRECApp.swift */,
+				1E3F3AF82BEE6E580019DEE0 /* ContentView.swift */,
+				1E0676722BF68C7F0058600B /* playSheetView.swift */,
 				1E3F3B0D2BEE9CD10019DEE0 /* RecView.swift */,
 				1E3F3B132BEEAE740019DEE0 /* SettingsView.swift */,
 				1E3F3B152BEEAE950019DEE0 /* EditView.swift */,
@@ -186,6 +189,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E0676732BF68C7F0058600B /* playSheetView.swift in Sources */,
 				1E3F3AF92BEE6E580019DEE0 /* ContentView.swift in Sources */,
 				1E3F3AFB2BEE6E580019DEE0 /* Item.swift in Sources */,
 				1E3F3B0E2BEE9CD10019DEE0 /* RecView.swift in Sources */,

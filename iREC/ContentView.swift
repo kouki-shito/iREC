@@ -49,22 +49,31 @@ struct ContentView: View {
           List(){
 
             ForEach(self.audios,id: \.self) { i in
+              HStack{
+                
+                VStack{
 
-              VStack{
-                let CreateDate = getCreationDateStr(url: i)
-                Text(i.relativeString)
-                  .fontWeight(.bold)
-                  .font(.title2)
-                  .frame(maxWidth: .infinity,alignment: .leading)
+                  let CreateDate = getCreationDateStr(url: i)
+                  Text(i.relativeString)
+                    .fontWeight(.bold)
+                    .font(.title2)
+                    .frame(maxWidth: .infinity,alignment: .leading)
 
-                Text(CreateDate)
-                  .frame(maxWidth: .infinity,alignment: .leading)
-                  .font(.headline)
-                  .opacity(0.7)
+                  Text(CreateDate)
+                    .frame(maxWidth: .infinity,alignment: .leading)
+                    .font(.headline)
+                    .opacity(0.7)
 
-                HStack{
-                  //tag
+                  HStack{
+                    //tag
+                  }
                 }
+                Button(action: {
+                  
+                }, label: {
+                  Image(systemName: "ellipsis")
+                })
+                .buttonStyle(.plain)
               }
               .contentShape(Rectangle())
               .onTapGesture {
@@ -137,9 +146,9 @@ struct ContentView: View {
               .frame(maxWidth:.infinity,maxHeight: 80)
 
             }
-            .onTapGesture {
-              print("Hello")
-            }
+            //            .onTapGesture {
+            //              //MordalView
+            //            }
 
           }
 
@@ -213,9 +222,13 @@ struct ContentView: View {
       }
       .onAppear(){
         getAudios()
+        audioPlay.currentTime = 0.0
       }
       .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()){ _ in
-        audioPlay.updateProgress()
+        if audioPlay.play == true{
+          audioPlay.updateProgress()
+        }
+
       }
 
     }//:navi
@@ -312,10 +325,13 @@ class AudioPlay : NSObject,AVAudioPlayerDelegate,ObservableObject{
 
   func setupPlayerAudio(url : URL){
     do{
+      self.session = AVAudioSession.sharedInstance()
+      try self.session.setCategory(.playback)
       player = try AVAudioPlayer(contentsOf: url)
       player?.prepareToPlay()
       playingName = url.relativePath
       totalTime = player?.duration ?? 0.0
+      currentTime = 0.0
     }
     catch{
       print(error.localizedDescription)

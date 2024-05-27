@@ -33,6 +33,7 @@ struct ContentView: View {
   @State var REC : Bool = false
   @State private var SortArray : [Audios] = []
   @State var audios : [URL] = []
+  @State private var audioTag = [String:Bool]()
 
   private var searchedAudio : [URL] {
     let Result = audios.filter{ $0.relativeString.localizedStandardContains(searchText)}
@@ -60,6 +61,7 @@ struct ContentView: View {
                   Text(i.relativeString)
                     .fontWeight(.bold)
                     .font(.title2)
+                    .padding(.top,5)
                     .frame(maxWidth: .infinity,alignment: .leading)
 
                   Text(CreateDate)
@@ -68,8 +70,28 @@ struct ContentView: View {
                     .opacity(0.7)
 
                   HStack{
-                    //tag
+                    FlexibleView(
+                      data: ["Lead","Chord","Vocal"],
+                      spacing: 10,
+                      alignment: .leading
+                    ){ item in
+                      Button(action:{
+
+                      }){
+                        HStack{
+                          Text(item)
+                            .font(.system(size: 15))
+                            .foregroundStyle(.white)
+                            .bold()
+                            .padding(5)
+                        }
+                        .background(.sub)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                      }
+
+                    }
                   }
+                  .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 Button(action: {
                   

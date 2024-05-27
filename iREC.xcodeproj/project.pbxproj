@@ -17,6 +17,7 @@
 		1E3F3B0E2BEE9CD10019DEE0 /* RecView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3F3B0D2BEE9CD10019DEE0 /* RecView.swift */; };
 		1E3F3B142BEEAE740019DEE0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3F3B132BEEAE740019DEE0 /* SettingsView.swift */; };
 		1E3F3B162BEEAE950019DEE0 /* EditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3F3B152BEEAE950019DEE0 /* EditView.swift */; };
+		1EFC61E52C0422EB002B084B /* FlexTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFC61E42C0422EB002B084B /* FlexTag.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		1E3F3B0D2BEE9CD10019DEE0 /* RecView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecView.swift; sourceTree = "<group>"; };
 		1E3F3B132BEEAE740019DEE0 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1E3F3B152BEEAE950019DEE0 /* EditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditView.swift; sourceTree = "<group>"; };
+		1EFC61E42C0422EB002B084B /* FlexTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexTag.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				1E3F3AFA2BEE6E580019DEE0 /* Item.swift */,
+				1EFC61E42C0422EB002B084B /* FlexTag.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -197,6 +200,7 @@
 				1E3F3B162BEEAE950019DEE0 /* EditView.swift in Sources */,
 				1E3F3B0C2BEE771E0019DEE0 /* SwiftUIView.swift in Sources */,
 				1E3F3AF72BEE6E580019DEE0 /* iRECApp.swift in Sources */,
+				1EFC61E52C0422EB002B084B /* FlexTag.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

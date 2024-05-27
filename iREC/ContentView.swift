@@ -23,18 +23,21 @@ struct ContentView: View {
 
   }
   @Environment(\.modelContext) private var modelContext
+  @ObservedObject var audioPlay : AudioPlay = AudioPlay()
 
   @Query private var items: [Item]
-  @State private var searchText = ""
+  @State private var searchText :String = ""
   @State private var titleText : String = ""
   @State private var navigationPath : [SamplePath] = []
   @State private var isAnimating : Bool = false
-
   @State var REC : Bool = false
   @State private var SortArray : [Audios] = []
   @State var audios : [URL] = []
 
-  @ObservedObject var audioPlay : AudioPlay = AudioPlay()
+  private var searchedAudio : [URL] {
+    let Result = audios.filter{ $0.relativeString.localizedStandardContains(searchText)}
+    return searchText.isEmpty ? audios : Result
+  }
 
 
   var body: some View {
@@ -48,7 +51,7 @@ struct ContentView: View {
           //MARK: -List
           List(){
 
-            ForEach(self.audios,id: \.self) { i in
+            ForEach(searchedAudio,id: \.self) { i in
               HStack{
                 
                 VStack{

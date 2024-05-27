@@ -18,6 +18,7 @@ struct RecView: View {
   @State private var isRec : Bool = false
   @State private var alert = false
   @State private var Text :String = ""
+  @State private var title : String = ""
 
   @State private var amplitudes : [CGFloat] = []
   @State private var nowLevel : CGFloat = 0.0
@@ -293,7 +294,7 @@ struct RecView: View {
         for: .documentDirectory,
         in: .userDomainMask)[0]
 
-      let fileName = url.appendingPathComponent("New_Rec\(self.audios.count + 1).m4a")
+      let fileName = url.appendingPathComponent("Record_\(self.audios.count + 1).m4a")
 
       let settings =  [
 
@@ -314,6 +315,12 @@ struct RecView: View {
       print(error.localizedDescription)
     }
   }
+
+//  private func numberOfOccurrences(of word: String) -> Int {
+//    var count = 0
+//    var range = word.
+//    return count
+//  }
 
   private func record(){
     self.recorder.record()
